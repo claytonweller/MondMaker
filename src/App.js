@@ -7,6 +7,7 @@ import colorSwap from './components/colorSwap'
 import starterBoxes from './components/starterBoxes'
 import updatedBoxes from './components/updatedBoxes'
 import edge from './components/edge'
+import barMaker from './components/barMaker'
 
 class App extends Component {
   constructor(){
@@ -34,16 +35,21 @@ class App extends Component {
     }
   }
 
-  mouseTracker = (e) =>{
-    let {barArray, boxArray, selectedBar, mouseY, mouseX, hold} = this.state
+  moveBar = () =>{
+    let {barArray, selectedBar, mouseY, mouseX, hold} = this.state
+    if(hold === true){
+      let mousePosition = this.convertToPercent(mouseX, mouseY)
+      if (barArray[selectedBar[0]] === undefined){
+      } else if (barArray[selectedBar[0]].barAllign === 'vertical'){
+        barArray[selectedBar[0]].barPosition = mousePosition.x        
+      } else if (barArray[selectedBar[0]].barAllign === 'horizontal'){
+        barArray[selectedBar[0]].barPosition = mousePosition.y
+      }
+    }
+  }
 
-    let x = e.clientX
-    let y = e.clientY
-    this.setState({
-      mouseY:y,
-      mouseX:x,
-    })
-
+  updateBars = () =>{
+    const {barArray} = this.state
     let arr = barArray.map(bar => bar)
     arr.splice(0,2)
 
@@ -58,67 +64,65 @@ class App extends Component {
           this.barMaker(i+2, barArray[bar.startParent], barArray[bar.endParent])
         }
         return 'nothing'
-
-
       })
     }
-    // arr.map((bar ,i)  => this.barMaker(i,barArray[bar.startParent],barArray[bar.endParent]))
+  }
 
-    if(hold === true){
-      let mousePosition = this.convertToPercent(mouseX, mouseY)
-      if (barArray[selectedBar[0]] === undefined){
-      } else if (barArray[selectedBar[0]].barAllign === 'vertical'){
-        barArray[selectedBar[0]].barPosition = mousePosition.x        
-      } else if (barArray[selectedBar[0]].barAllign === 'horizontal'){
-        barArray[selectedBar[0]].barPosition = mousePosition.y
-      }
+  mouseTracker = (e) =>{
+    let {barArray, boxArray} = this.state
 
-      this.boxBuilder(updatedBoxes(barArray, boxArray))
+    let x = e.clientX
+    let y = e.clientY
+    this.setState({
+      mouseY:y,
+      mouseX:x,
+    })
 
-
-    }
+    this.updateBars()   
+    this.moveBar()
+    this.boxBuilder(updatedBoxes(barArray, boxArray))
   }
 
   grabBar = () => this.setState({hold:true})
   releaseBar = () => this.setState({hold:false, selectedBar:[]})
   
-  barMaker = (i, bar1, bar2) =>{
-    const { barArray } = this.state;
-    let start = bar1
-    let end = bar2
-    if(bar2.barPosition<bar1.barPosition){
-      start = bar2
-      end = bar1
-    }
+  // barMaker = (i, bar1, bar2) =>{
+  //   const { barArray } = this.state;
+  //   let start = bar1
+  //   let end = bar2
+  //   if(bar2.barPosition<bar1.barPosition){
+  //     start = bar2
+  //     end = bar1
+  //   }
 
-    let orientation = 'vertical'
-    let startPosition = 0;
-    let endPosition = 100;
-    let startParent = edge.left
-    let endParent = edge.right
+  //   let orientation = 'vertical'
+  //   let startPosition = 0;
+  //   let endPosition = 100;
+  //   let startParent = edge.left
+  //   let endParent = edge.right
 
-    if (start.barAllign === 'vertical'){
-      orientation = 'horizontal'
-      startParent = edge.top
-      endParent = edge.bottom
-    }
-    if (start.barPosition !== undefined){
-      startPosition = start.barPosition
-      startParent = start.index
-    } 
-    if (end.barPosition !== undefined){
-      endPosition = end.barPosition
-      endParent = end.index
-    }
-    barArray[i] = {
-      index:i, 
-      barAllign:orientation, 
-      startPosition:startPosition, 
-      endPosition:endPosition, 
-      startParent:startParent,
-      endParent:endParent,
-    }
-  }
+  //   if (start.barAllign === 'vertical'){
+  //     orientation = 'horizontal'
+  //     startParent = edge.top
+  //     endParent = edge.bottom
+  //   }
+  //   if (start.barPosition !== undefined){
+  //     startPosition = start.barPosition
+  //     startParent = start.index
+  //   } 
+  //   if (end.barPosition !== undefined){
+  //     endPosition = end.barPosition
+  //     endParent = end.index
+  //   }
+  //   barArray[i] = {
+  //     index:i, 
+  //     barAllign:orientation, 
+  //     startPosition:startPosition, 
+  //     endPosition:endPosition, 
+  //     startParent:startParent,
+  //     endParent:endParent,
+  //   }
+  // }
 
   barClick = (event) =>{
     const {selectedBar} = this.state
