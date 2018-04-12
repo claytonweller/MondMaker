@@ -1,4 +1,5 @@
 import React from 'react';
+import './Box.css'
 
 const Box = ({onBoxClick, boxTop, boxRight, boxBottom, boxLeft, boxColor, boxId})=>{
 
@@ -14,7 +15,7 @@ const Box = ({onBoxClick, boxTop, boxRight, boxBottom, boxLeft, boxColor, boxId}
 	}
 
 	return(
-		<div onClick={()=>onBoxClick(boxColor,boxId)} style={boxProps}>
+		<div className='box' onClick={()=>onBoxClick(boxColor,boxId)} style={boxProps}>
 		</div>
 
 	)

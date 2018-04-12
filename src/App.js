@@ -49,7 +49,6 @@ class App extends Component {
 
     if (arr.length >0){
       arr.map((bar,i) => {
-        
 
         if(!Number.isInteger(bar.endParent)){
           this.barMaker(i+2, barArray[bar.startParent], this.edgeSorter(bar.endParent))
@@ -58,7 +57,7 @@ class App extends Component {
         } else {
           this.barMaker(i+2, barArray[bar.startParent], barArray[bar.endParent])
         }
-
+        return 'nothing'
 
 
       })
@@ -66,7 +65,7 @@ class App extends Component {
     // arr.map((bar ,i)  => this.barMaker(i,barArray[bar.startParent],barArray[bar.endParent]))
 
     if(hold === true){
-      let mousePosition = this.convertToPercent(mouseX - 10, mouseY-10)
+      let mousePosition = this.convertToPercent(mouseX, mouseY)
       if (barArray[selectedBar[0]] === undefined){
       } else if (barArray[selectedBar[0]].barAllign === 'vertical'){
         barArray[selectedBar[0]].barPosition = mousePosition.x        
@@ -83,8 +82,15 @@ class App extends Component {
   grabBar = () => this.setState({hold:true})
   releaseBar = () => this.setState({hold:false, selectedBar:[]})
   
-  barMaker = (i, start, end) =>{
+  barMaker = (i, bar1, bar2) =>{
     const { barArray } = this.state;
+    let start = bar1
+    let end = bar2
+    if(bar2.barPosition<bar1.barPosition){
+      start = bar2
+      end = bar1
+    }
+
     let orientation = 'vertical'
     let startPosition = 0;
     let endPosition = 100;
@@ -123,7 +129,7 @@ class App extends Component {
 
   newBar = () =>{
     const {barArray } = this.state
-    this.barMaker(barArray.length, barArray[1], edge.bottom)
+    this.barMaker(barArray.length, barArray[1], edge.top)
   }
 
   convertToPercent = (x,y) => {

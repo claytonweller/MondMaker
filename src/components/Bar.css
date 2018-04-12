@@ -2,12 +2,31 @@
 	position: absolute;
 	background-color: black;
 	z-index: 5;
+	transition-duration:50ms;
+
 }
 
 .horizontal{
 	height: 25px;
+	transform: translate(0, -10px);
 }
 
 .vertical{
 	width: 25px;
+	transform:  translate(-10px, 0px);
 }
+
+.bar:hover{
+	transition: background-color .3s ease-out;
+	transition: border .3s ease-out;
+	background-color: rgb(20,20,20) ;
+	z-index:20;
+	border: 2px solid rgb(200, 50, 0);
+	cursor: pointer;
+}
+
+.bar:active{
+	border: 2px solid rgb(200, 50, 0);
+	background-color: rgb(20,20,20) ;
+}
+
