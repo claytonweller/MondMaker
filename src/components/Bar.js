@@ -1,7 +1,7 @@
 import React from 'react';
 import './Bar.css'
 
-const Bar = ({startPosition, endPosition, barAllign, barPosition, index}) =>{
+const Bar = ({startPosition, endPosition, barAllign, barPosition, index, barClick}) =>{
 
 	const indBarAllign = ()=>{
 		if(barAllign === 'vertical'){
@@ -28,13 +28,9 @@ const Bar = ({startPosition, endPosition, barAllign, barPosition, index}) =>{
 		};
 	};
 
-	const barClick = () =>{
-		console.log(index)
-	}
-
 	return(
 
-			<div style={indBarPosition()} className={indBarAllign()} onClick={barClick} ></div>
+			<div id={`bar${index}`} style={indBarPosition()} className={indBarAllign()} onMouseDown={barClick} ></div>
 	)
 }
 
