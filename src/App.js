@@ -5,17 +5,16 @@ import './App.css';
 
 import colorSwap from './components/colorSwap'
 import starterBoxes from './components/starterBoxes'
+import updatedBoxes from './components/updatedBoxes'
+import edge from './components/edge'
 
 class App extends Component {
   constructor(){
     super();
     this.state={
       barArray:[
-        {barAllign:'vertical', barPosition:30, startPosition:0, endPosition:100},
-        {barAllign:'horizontal', barPosition:80, startPosition:0, endPosition:100},
-        // {barAllign:'vertical', barPosition:80, startPosition:50, endPosition:100},
-        // {barAllign:'horizontal', barPosition:80, startPosition:0, endPosition:30},
-        // {barAllign:'vertical', barPosition:10, startPosition:50, endPosition:80}      
+        {index:0, barAllign:'vertical', barPosition:30, startPosition:0, endPosition:100},
+        {index:1, barAllign:'horizontal', barPosition:80, startPosition:0, endPosition:100},     
       ],
       boxArray:[],
       mouseY: 0,
@@ -25,8 +24,18 @@ class App extends Component {
     }
   }
 
+  edgeSorter = (dir) =>{
+    switch (dir){
+      case 'right': return edge.right
+      case 'left': return edge.left 
+      case 'top': return edge.top
+      case 'bottom': return edge.bottom
+      default: return edge.top
+    }
+  }
+
   mouseTracker = (e) =>{
-    let {barArray, selectedBar, mouseY, mouseX, hold} = this.state
+    let {barArray, boxArray, selectedBar, mouseY, mouseX, hold} = this.state
 
     let x = e.clientX
     let y = e.clientY
@@ -34,6 +43,28 @@ class App extends Component {
       mouseY:y,
       mouseX:x,
     })
+
+    let arr = barArray.map(bar => bar)
+    arr.splice(0,2)
+
+    if (arr.length >0){
+      arr.map((bar,i) => {
+        
+
+        if(!Number.isInteger(bar.endParent)){
+          this.barMaker(i+2, barArray[bar.startParent], this.edgeSorter(bar.endParent))
+        }else if(!Number.isInteger(bar.startParent)){
+          this.barMaker(i+2, this.edgeSorter(bar.startParent), barArray[bar.endParent]) 
+        } else {
+          this.barMaker(i+2, barArray[bar.startParent], barArray[bar.endParent])
+        }
+
+
+
+      })
+    }
+    // arr.map((bar ,i)  => this.barMaker(i,barArray[bar.startParent],barArray[bar.endParent]))
+
     if(hold === true){
       let mousePosition = this.convertToPercent(mouseX - 10, mouseY-10)
       if (barArray[selectedBar[0]] === undefined){
@@ -42,19 +73,57 @@ class App extends Component {
       } else if (barArray[selectedBar[0]].barAllign === 'horizontal'){
         barArray[selectedBar[0]].barPosition = mousePosition.y
       }
-      this.boxBuilder(starterBoxes(barArray))
+
+      this.boxBuilder(updatedBoxes(barArray, boxArray))
+
+
     }
   }
 
   grabBar = () => this.setState({hold:true})
   releaseBar = () => this.setState({hold:false, selectedBar:[]})
   
+  barMaker = (i, start, end) =>{
+    const { barArray } = this.state;
+    let orientation = 'vertical'
+    let startPosition = 0;
+    let endPosition = 100;
+    let startParent = edge.left
+    let endParent = edge.right
+
+    if (start.barAllign === 'vertical'){
+      orientation = 'horizontal'
+      startParent = edge.top
+      endParent = edge.bottom
+    }
+    if (start.barPosition !== undefined){
+      startPosition = start.barPosition
+      startParent = start.index
+    } 
+    if (end.barPosition !== undefined){
+      endPosition = end.barPosition
+      endParent = end.index
+    }
+    barArray[i] = {
+      index:i, 
+      barAllign:orientation, 
+      startPosition:startPosition, 
+      endPosition:endPosition, 
+      startParent:startParent,
+      endParent:endParent,
+    }
+  }
 
   barClick = (event) =>{
     const {selectedBar} = this.state
     let index = event.target.id;
     index = index.slice(3)
     selectedBar[0] = index
+  }
+
+  newBar = () =>{
+    const {barArray } = this.state
+    this.barMaker(barArray.length, barArray[1], edge.bottom)
   }
 
   convertToPercent = (x,y) => {
@@ -96,7 +165,10 @@ class App extends Component {
           barClick={this.barClick} 
         />
         <AllBoxes onBoxClick={this.onBoxClick} boxArray={boxArray} /> 
-        <div style={{zIndex:100, backgroundColor:'transparent'}}>{mouseX}, {mouseY}</div>
+        <div style={{zIndex:100, backgroundColor:'lightblue', maxWidth:'100px'}}>
+          <div style={{ backgroundColor:'transparent'}}>x{mouseX}, y{mouseY}</div>
+          <button id='new-bar' onClick={this.newBar}> newBar </button>
+        </div>
       </div>
     );
   }
