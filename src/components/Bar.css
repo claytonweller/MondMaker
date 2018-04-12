@@ -1,0 +1,13 @@
+.bar{
+	position: absolute;
+	background-color: black;
+	z-index: 5;
+}
+
+.horizontal{
+	height: 25px;
+}
+
+.vertical{
+	width: 25px;
+}
