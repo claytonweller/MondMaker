@@ -11,14 +11,6 @@ const Bar = ({startPosition, endPosition, barAllign, barPosition, index, barClic
 		};
 	};
 
-	const draggableAxis = ()=>{
-		if(barAllign === 'vertical'){
-			return `x`;
-		}else if(barAllign === 'horizontal'){
-			return 'y';
-		};
-	}
-
 	const indBarPosition = ()=>{
 		if(barAllign === 'vertical'){
 			return {left:`${barPosition}%`, top:`${startPosition}%`, bottom:`${100-endPosition}%`};

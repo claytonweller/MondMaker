@@ -13,7 +13,7 @@ class App extends Component {
       barArray:[
         {barAllign:'vertical', barPosition:30, startPosition:0, endPosition:100},
         {barAllign:'horizontal', barPosition:80, startPosition:0, endPosition:100},
-        {barAllign:'vertical', barPosition:80, startPosition:50, endPosition:100},
+        // {barAllign:'vertical', barPosition:80, startPosition:50, endPosition:100},
         // {barAllign:'horizontal', barPosition:80, startPosition:0, endPosition:30},
         // {barAllign:'vertical', barPosition:10, startPosition:50, endPosition:80}      
       ],
@@ -21,14 +21,8 @@ class App extends Component {
       mouseY: 0,
       mouseX: 0,
       hold:false,
-      selectedBar:[1],
+      selectedBar:[],
     }
-  }
-
-  barMaker = () =>{
-    const newBar = {barAllign:'vertical', barPosition:10, startPosition:50, endPosition:80};
-    this.state.barArray.push(newBar);    
-    this.setState({barArray:this.state.barArray});  
   }
 
   mouseTracker = (e) =>{
@@ -39,34 +33,22 @@ class App extends Component {
     this.setState({
       mouseY:y,
       mouseX:x,
-      
     })
     if(hold === true){
-      let mousePosition = this.convertToPercent(mouseX - 10, mouseY)
-      if (barArray[selectedBar[0]].barAllign === 'vertical'){
+      let mousePosition = this.convertToPercent(mouseX - 10, mouseY-10)
+      if (barArray[selectedBar[0]] === undefined){
+      } else if (barArray[selectedBar[0]].barAllign === 'vertical'){
         barArray[selectedBar[0]].barPosition = mousePosition.x        
-      } else if (barArray[selectedBar[0]].barAllign === 'horizontal')
+      } else if (barArray[selectedBar[0]].barAllign === 'horizontal'){
         barArray[selectedBar[0]].barPosition = mousePosition.y
+      }
+      this.boxBuilder(starterBoxes(barArray))
     }
   }
 
-  // onMouseClick = () => {
-  //   let {barArray} = this.state
-  //   let clickPosition = this.convertToPercent(this.state.mouseX - 10, this.state.mouseY)
-
-  //   console.log(clickPosition.x, barArray[0])
-
-  // }
-
-  grabBar = () =>{
-    this.setState({
-      hold:true
-    })
-  }
-
-  releaseBar = () =>{
-    this.setState({hold:false})
-  }
+  grabBar = () => this.setState({hold:true})
+  releaseBar = () => this.setState({hold:false, selectedBar:[]})
+  
 
   barClick = (event) =>{
     const {selectedBar} = this.state
@@ -81,14 +63,13 @@ class App extends Component {
     return {x:xPercent, y:yPercent}
   }
 
-  boxBuilder = () =>{
-    const {barArray} = this.state;
-    let boxes = starterBoxes(barArray)
-    this.setState({boxArray:boxes})
+  boxBuilder = (arr) =>{
+    this.setState({boxArray:arr})
   }
 
   componentDidMount(){
-    this.boxBuilder();
+    const {barArray} = this.state;
+    this.boxBuilder(starterBoxes(barArray));
 
   }
 
