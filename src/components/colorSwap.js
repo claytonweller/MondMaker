@@ -14,7 +14,6 @@ const colorSwap= {
 	},
 	start: (id)=>{
 		let idSort = id%4
-		console.log(id)
 		switch (idSort){
 			case 0 : return 'white'
 			case 1 : return 'blue'

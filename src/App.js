@@ -68,6 +68,27 @@ class App extends Component {
     }
   }
 
+  updateBoxes = () =>{
+    const {barArray, boxArray} = this.state
+    let arr = boxArray.map(box => box)
+    
+    if (arr.length >0){
+      arr.map((box,i) => {
+        let parents = box.parents.map(parent =>{
+          if(!Number.isInteger(parent)){
+            return this.edgeSorter(parent)
+          } else {
+            return barArray[parent]
+          }
+          
+        })
+        this. boxBuilder(parents)
+        console.log()
+      })
+    }
+
+  }
+
   mouseTracker = (e) =>{
     let {barArray, boxArray} = this.state
 
@@ -80,7 +101,7 @@ class App extends Component {
 
     this.updateBars()   
     this.moveBar()
-    // this.boxBuilder(updatedBoxes(barArray, boxArray))
+    // this.updateBoxes()
   }
 
   grabBar = () => this.setState({hold:true})
@@ -129,8 +150,7 @@ class App extends Component {
       left = vertical[1]
       right = vertical[0]
     }
-    let color = colorSwap.start(boxArray.length)
-    console.log(color)
+
 
     let box ={
       boxId:boxArray.length,
@@ -138,23 +158,31 @@ class App extends Component {
       boxTop:top.barPosition,
       boxRight:right.barPosition,
       boxBottom:bottom.barPosition,
-      boxColor:color
+      parents:[ top.index, bottom.index, left.index, right.index]
     }
-    // console.log(box)
     
-    boxArray.splice(box.boxId,1, box)
-    
-    // this.setState({boxArray:arr})
+    boxArray.splice(box.boxId,1, box)  
+
+    return box.boxId
+
   }
 
+  newBox = (parents) => {
+    const {boxArray}= this.state;
+    let i = this.boxBuilder(parents)
+    boxArray[i].boxColor = colorSwap.start(i)
+  }
+
+ 
+
   componentDidMount(){
-    const {barArray} = this.state;
-    
-    this.boxBuilder([edge.bottom, barArray[1], edge.right, edge.left])
-    this.boxBuilder([  edge.left, edge.top, barArray[1],  edge.right,])
-    this.boxBuilder([  barArray[0], edge.top, barArray[1],  edge.right,])
-    this.boxBuilder([edge.bottom, barArray[1], barArray[0], edge.left])
-    // this.boxBuilder(starterBoxes(barArray));
+    const {barArray, boxArray} = this.state;
+    let arr = starterBoxes(barArray)
+    arr.map((box, i) => {
+      this.newBox(box)
+    })
+
+
 
   }
 
