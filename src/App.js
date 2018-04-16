@@ -80,7 +80,7 @@ class App extends Component {
 
     this.updateBars()   
     this.moveBar()
-    this.boxBuilder(updatedBoxes(barArray, boxArray))
+    // this.boxBuilder(updatedBoxes(barArray, boxArray))
   }
 
   grabBar = () => this.setState({hold:true})
@@ -111,19 +111,56 @@ class App extends Component {
     return {x:xPercent, y:yPercent}
   }
 
-  boxBuilder = (arr) =>{
-    this.setState({boxArray:arr})
+  boxBuilder = (parents) =>{
+    const {boxArray} = this.state
+    
+    let horizontal = parents.filter(bar => bar.barAllign === 'horizontal')
+    let top = horizontal[1]
+    let bottom = horizontal[0]
+    if (horizontal[1].barPosition>horizontal[0].barPosition){
+      top = horizontal[0]
+      bottom = horizontal[1]
+    } 
+
+    let vertical = parents.filter(bar => bar.barAllign === 'vertical')
+    let left = vertical[0]
+    let right = vertical[1]
+    if (vertical[0].barPosition>vertical[1].barPosition){
+      left = vertical[1]
+      right = vertical[0]
+    }
+    let color = colorSwap.start(boxArray.length)
+    console.log(color)
+
+    let box ={
+      boxId:boxArray.length,
+      boxLeft:left.barPosition,
+      boxTop:top.barPosition,
+      boxRight:right.barPosition,
+      boxBottom:bottom.barPosition,
+      boxColor:color
+    }
+    // console.log(box)
+    
+    boxArray.splice(box.boxId,1, box)
+    
+    // this.setState({boxArray:arr})
   }
 
   componentDidMount(){
     const {barArray} = this.state;
-    this.boxBuilder(starterBoxes(barArray));
+    
+    this.boxBuilder([edge.bottom, barArray[1], edge.right, edge.left])
+    this.boxBuilder([  edge.left, edge.top, barArray[1],  edge.right,])
+    this.boxBuilder([  barArray[0], edge.top, barArray[1],  edge.right,])
+    this.boxBuilder([edge.bottom, barArray[1], barArray[0], edge.left])
+    // this.boxBuilder(starterBoxes(barArray));
 
   }
 
   onBoxClick = (color, id)=>{
     const {boxArray} = this.state;
-    colorSwap(boxArray, id, color)
+    colorSwap.rotate(boxArray, id, color)
     this.setState(boxArray); 
   }
 
