@@ -2,7 +2,7 @@
 	position: absolute;
 	background-color: black;
 	z-index: 5;
-	transition-duration:50ms;
+	transition: 50ms, background-color 1s ease-out, border .3s ease-out;
 
 }
 
@@ -17,8 +17,8 @@
 }
 
 .bar:hover{
-	transition: background-color .3s ease-out;
-	transition: border .3s ease-out;
+	
+
 	background-color: rgb(20,20,20) ;
 	z-index:20;
 	border: 2px solid rgb(200, 50, 0);
