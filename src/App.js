@@ -57,11 +57,11 @@ class App extends Component {
       arr.map((bar,i) => {
 
         if(!Number.isInteger(bar.endParent)){
-          this.barMaker(i+2, barArray[bar.startParent], this.edgeSorter(bar.endParent))
+          this.constructBar(i+2, barArray[bar.startParent], this.edgeSorter(bar.endParent))
         }else if(!Number.isInteger(bar.startParent)){
-          this.barMaker(i+2, this.edgeSorter(bar.startParent), barArray[bar.endParent]) 
+          this.constructBar(i+2, this.edgeSorter(bar.startParent), barArray[bar.endParent]) 
         } else {
-          this.barMaker(i+2, barArray[bar.startParent], barArray[bar.endParent])
+          this.constructBar(i+2, barArray[bar.startParent], barArray[bar.endParent])
         }
         return 'nothing'
       })
@@ -86,43 +86,12 @@ class App extends Component {
   grabBar = () => this.setState({hold:true})
   releaseBar = () => this.setState({hold:false, selectedBar:[]})
   
-  // barMaker = (i, bar1, bar2) =>{
-  //   const { barArray } = this.state;
-  //   let start = bar1
-  //   let end = bar2
-  //   if(bar2.barPosition<bar1.barPosition){
-  //     start = bar2
-  //     end = bar1
-  //   }
-
-  //   let orientation = 'vertical'
-  //   let startPosition = 0;
-  //   let endPosition = 100;
-  //   let startParent = edge.left
-  //   let endParent = edge.right
-
-  //   if (start.barAllign === 'vertical'){
-  //     orientation = 'horizontal'
-  //     startParent = edge.top
-  //     endParent = edge.bottom
-  //   }
-  //   if (start.barPosition !== undefined){
-  //     startPosition = start.barPosition
-  //     startParent = start.index
-  //   } 
-  //   if (end.barPosition !== undefined){
-  //     endPosition = end.barPosition
-  //     endParent = end.index
-  //   }
-  //   barArray[i] = {
-  //     index:i, 
-  //     barAllign:orientation, 
-  //     startPosition:startPosition, 
-  //     endPosition:endPosition, 
-  //     startParent:startParent,
-  //     endParent:endParent,
-  //   }
-  // }
+  constructBar = (i, bar1, bar2) =>{
+    const { barArray } = this.state;
+    let newBar = barMaker(i, bar1, bar2);
+    barArray[i] = newBar
+    
+  }
 
   barClick = (event) =>{
     const {selectedBar} = this.state
@@ -133,7 +102,7 @@ class App extends Component {
 
   newBar = () =>{
     const {barArray } = this.state
-    this.barMaker(barArray.length, barArray[1], edge.top)
+    this.constructBar(barArray.length, barArray[1], edge.top)
   }
 
   convertToPercent = (x,y) => {
