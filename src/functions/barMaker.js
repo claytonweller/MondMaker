@@ -1,6 +1,6 @@
-import edge from './edge'
+import edge from '../functions/edge'
 
-const barMaker = (i, bar1, bar2) =>{
+const barMaker = (i, bar1, bar2, barPosition) =>{
   
   let start = bar1
   let end = bar2
@@ -32,7 +32,8 @@ const barMaker = (i, bar1, bar2) =>{
     index:i, 
     barAllign:orientation, 
     startPosition:startPosition, 
-    endPosition:endPosition, 
+    endPosition:endPosition,
+    barPosition:barPosition, 
     startParent:startParent,
     endParent:endParent,
   }
