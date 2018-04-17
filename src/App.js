@@ -68,26 +68,7 @@ class App extends Component {
     }
   }
 
-  updateBoxes = () =>{
-    const {barArray, boxArray} = this.state
-    let arr = boxArray.map(box => box)
-    
-    if (arr.length >0){
-      arr.map((box,i) => {
-        let parents = box.parents.map(parent =>{
-          if(!Number.isInteger(parent)){
-            return this.edgeSorter(parent)
-          } else {
-            return barArray[parent]
-          }
-          
-        })
-        this. boxBuilder(parents)
-        console.log()
-      })
-    }
 
-  }
 
   mouseTracker = (e) =>{
     let {barArray, boxArray} = this.state
@@ -101,7 +82,7 @@ class App extends Component {
 
     this.updateBars()   
     this.moveBar()
-    // this.updateBoxes()
+    this.updateBoxes()
   }
 
   grabBar = () => this.setState({hold:true})
@@ -132,7 +113,27 @@ class App extends Component {
     return {x:xPercent, y:yPercent}
   }
 
-  boxBuilder = (parents) =>{
+  updateBoxes = () =>{
+    const {barArray, boxArray} = this.state
+    let arr = boxArray.map(box => box)
+    if (arr.length > 0){
+      arr.map((box,i) => {
+        let parents = box.parents.map(parent =>{
+          if(!Number.isInteger(parent)){
+            return this.edgeSorter(parent)
+          } else {
+            return barArray[parent]
+          }
+          
+        })
+        this.boxBuilder(parents, box.boxId, box.boxColor)
+
+      })
+    }
+
+  }
+
+  boxBuilder = (parents, index, color) =>{
     const {boxArray} = this.state
     
     let horizontal = parents.filter(bar => bar.barAllign === 'horizontal')
@@ -151,17 +152,17 @@ class App extends Component {
       right = vertical[0]
     }
 
-
-    let box ={
-      boxId:boxArray.length,
+    let box = {
+      boxId:index,
       boxLeft:left.barPosition,
       boxTop:top.barPosition,
       boxRight:right.barPosition,
       boxBottom:bottom.barPosition,
-      parents:[ top.index, bottom.index, left.index, right.index]
+      parents:[ top.index, bottom.index, left.index, right.index],
+      boxColor:color
     }
-    
-    boxArray.splice(box.boxId,1, box)  
+    boxArray.splice(box.boxId, 1, box)
+
 
     return box.boxId
 
@@ -169,7 +170,7 @@ class App extends Component {
 
   newBox = (parents) => {
     const {boxArray}= this.state;
-    let i = this.boxBuilder(parents)
+    let i = this.boxBuilder(parents, boxArray.length)
     boxArray[i].boxColor = colorSwap.start(i)
   }
 
@@ -187,9 +188,11 @@ class App extends Component {
   }
 
   onBoxClick = (color, id)=>{
-    const {boxArray} = this.state;
-    colorSwap.rotate(boxArray, id, color)
-    this.setState(boxArray); 
+    // const {boxArray} = this.state;
+    // colorSwap.rotate(boxArray, id, color)
+    // this.setState(boxArray); 
+    this.updateBoxes();
+
   }
 
   render() {
