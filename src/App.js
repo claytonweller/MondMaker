@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import Allbars from './components/Allbars';
 import AllBoxes from './components/AllBoxes';
+import BarAdder from './components/BarAdder';
 import './App.css';
 
 import colorSwap from './functions/colorSwap'
 import starterBoxes from './components/starterBoxes'
-import edge from './functions/edge'
 import edgeSorter from './functions/edgeSorter'
 import convertToPercent from './functions/convertToPercent'
 import barMaker from './functions/barMaker'
 import evalDist from './functions/evalDist'
+
 
 
 class App extends Component {
@@ -86,11 +87,28 @@ class App extends Component {
     selectedBar[0] = index
   }
 
-  newBar = () =>{
-    const {barArray} = this.state
-    let bar = this.constructBar(barArray.length, barArray[1], edge.top, 40)
-
+  newBarClick = () =>{
+    const {barArray, boxArray} = this.state
+    let edge1 = document.getElementById('edge1').value
+    let edge2 = document.getElementById('edge2').value
+      
+    const interpret = (value) =>{
+      let int = parseInt(value)
+      if(!Number.isInteger(int)){
+        console.log(value)
+        return edgeSorter(value)
+      } else { 
+        return barArray[value]
+      }
+    }  
     
+
+    this.newBar(interpret(edge1), interpret(edge2))
+  }
+
+  newBar = (edge1, edge2) =>{
+    const {barArray} = this.state
+    let bar = this.constructBar(barArray.length, edge1, edge2, 40)
     let box = this.boxSelector(bar)
     this.boxSplitter(bar, box)
     
@@ -200,13 +218,13 @@ class App extends Component {
     return box.boxId
   }
 
-  newBox = (parents) => {
+  newBox = (parents, startColor) => {
     const {boxArray}= this.state;
     let i = this.boxBuilder(parents, boxArray.length)
     boxArray[i].boxColor = colorSwap.start(i)
   }
 
-  componentDidMount(){
+  componentWillMount(){
     const {barArray} = this.state;
     let arr = starterBoxes(barArray)
     arr.map((box, i) => {
@@ -240,10 +258,11 @@ class App extends Component {
           barClick={this.barClick} 
         />
         <AllBoxes onBoxClick={this.onBoxClick} boxArray={boxArray} /> 
-        <div style={{zIndex:100, backgroundColor:'lightblue', maxWidth:'100px'}}>
-          <div style={{ backgroundColor:'transparent'}}>x{mouseX}, y{mouseY}</div>
-          <button id='new-bar' onClick={this.newBar}> newBar </button>
-        </div>
+        <BarAdder
+          mouseX={mouseX}
+          mouseY={mouseY}
+          newBar={this.newBarClick}
+        />
       </div>
     );
   }
