@@ -3,12 +3,13 @@ import Allbars from './components/Allbars';
 import AllBoxes from './components/AllBoxes';
 import './App.css';
 
-import colorSwap from './components/colorSwap'
+import colorSwap from './functions/colorSwap'
 import starterBoxes from './components/starterBoxes'
-import edge from './components/edge'
-import edgeSorter from './components/edgeSorter'
+import edge from './functions/edge'
+import edgeSorter from './functions/edgeSorter'
 import convertToPercent from './functions/convertToPercent'
-import barMaker from './components/barMaker'
+import barMaker from './functions/barMaker'
+import evalDist from './functions/evalDist'
 
 
 class App extends Component {
@@ -25,6 +26,19 @@ class App extends Component {
       hold:false,
       selectedBar:[],
     }
+  }
+
+  mouseTracker = (e) =>{
+    let x = e.clientX
+    let y = e.clientY
+    this.setState({
+      mouseY:y,
+      mouseX:x,
+    })
+
+    this.updateBars()   
+    this.moveBar()
+    this.updateBoxes()
   }
 
   moveBar = () =>{
@@ -49,40 +63,22 @@ class App extends Component {
       arr.map((bar,i) => {
 
         if(!Number.isInteger(bar.endParent)){
-          this.constructBar(i+2, barArray[bar.startParent], edgeSorter(bar.endParent))
+          return this.constructBar(i+2, barArray[bar.startParent], edgeSorter(bar.endParent), bar.barPosition)
         }else if(!Number.isInteger(bar.startParent)){
-          this.constructBar(i+2, edgeSorter(bar.startParent), barArray[bar.endParent]) 
+          return this.constructBar(i+2, edgeSorter(bar.startParent), barArray[bar.endParent], bar.barPosition) 
         } else {
-          this.constructBar(i+2, barArray[bar.startParent], barArray[bar.endParent])
+          return this.constructBar(i+2, barArray[bar.startParent], barArray[bar.endParent], bar.barPosition)
         }
-        return 'nothing'
+        
       })
     }
   }
 
-  mouseTracker = (e) =>{
-    let x = e.clientX
-    let y = e.clientY
-    this.setState({
-      mouseY:y,
-      mouseX:x,
-    })
 
-    this.updateBars()   
-    this.moveBar()
-    this.updateBoxes()
-  }
 
   grabBar = () => this.setState({hold:true})
   releaseBar = () => this.setState({hold:false, selectedBar:[]})
   
-  constructBar = (i, bar1, bar2) =>{
-    const { barArray } = this.state;
-    let newBar = barMaker(i, bar1, bar2);
-    barArray[i] = newBar
-    
-  }
-
   barClick = (event) =>{
     const {selectedBar} = this.state
     let index = event.target.id;
@@ -92,7 +88,65 @@ class App extends Component {
 
   newBar = () =>{
     const {barArray} = this.state
-    this.constructBar(barArray.length, barArray[1], edge.top)
+    let bar = this.constructBar(barArray.length, barArray[1], edge.top, 40)
+
+    
+    let box = this.boxSelector(bar)
+    this.boxSplitter(bar, box)
+    
+  }
+
+  boxSelector = (bar)=>{
+    const {boxArray} = this.state
+    let startBoxArray = boxArray
+                .filter(box => box.parents.includes(bar.startParent))
+                .filter(box => box.parents.includes(bar.endParent))
+    
+    if(startBoxArray.length >1){
+      if(bar.barAllign === 'horizontal'){
+        startBoxArray = startBoxArray.filter( box => Math.abs(box.boxTop - box.boxBottom) === evalDist(box.boxTop, box.boxBottom, bar.barPosition))       
+      } else if(bar.barAllign === 'vertical') {
+        startBoxArray = startBoxArray.filter( box => Math.abs(box.boxLeft - box.boxRight) === evalDist(box.boxLeft, box.boxRight, bar.barPosition))
+      }
+    }  
+    let startBox = startBoxArray[0]
+    return startBox
+
+  }
+
+  boxSplitter = (bar, startBox) => {
+    const {barArray} = this.state
+               
+    let definiteParents = [bar.startParent, bar.endParent]
+    let partialParents = startBox.parents.filter(parent => parent !== bar.startParent).filter(parent => parent !==bar.endParent)
+    let pIndexA = definiteParents.concat(bar.index, partialParents[0])
+    let pIndexB = definiteParents.concat(bar.index, partialParents[1])
+    let parentsA = pIndexA.map(index => {
+      if (Number.isInteger(index)){
+        return barArray[index]
+      } else {
+        return edgeSorter(index)
+      }
+    })
+    let parentsB = pIndexB.map(index => {
+      if (Number.isInteger(index)){
+        return barArray[index]
+      } else {
+        return edgeSorter(index)
+      }
+    })
+
+    this.boxBuilder(parentsA, startBox.boxId, startBox.boxColor)
+    this.newBox(parentsB)
+
+  }
+  
+  constructBar = (i, bar1, bar2, barPosition) =>{
+    const { barArray } = this.state;
+    let newBar = barMaker(i, bar1, bar2, barPosition);
+    barArray[i] = newBar
+    return newBar
+    
   }
 
   updateBoxes = () =>{
