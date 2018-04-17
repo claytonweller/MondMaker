@@ -5,9 +5,11 @@ import './App.css';
 
 import colorSwap from './components/colorSwap'
 import starterBoxes from './components/starterBoxes'
-import updatedBoxes from './components/updatedBoxes'
 import edge from './components/edge'
+import edgeSorter from './components/edgeSorter'
+import convertToPercent from './functions/convertToPercent'
 import barMaker from './components/barMaker'
+
 
 class App extends Component {
   constructor(){
@@ -25,20 +27,10 @@ class App extends Component {
     }
   }
 
-  edgeSorter = (dir) =>{
-    switch (dir){
-      case 'right': return edge.right
-      case 'left': return edge.left 
-      case 'top': return edge.top
-      case 'bottom': return edge.bottom
-      default: return edge.top
-    }
-  }
-
   moveBar = () =>{
     let {barArray, selectedBar, mouseY, mouseX, hold} = this.state
     if(hold === true){
-      let mousePosition = this.convertToPercent(mouseX, mouseY)
+      let mousePosition = convertToPercent(mouseX, mouseY)
       if (barArray[selectedBar[0]] === undefined){
       } else if (barArray[selectedBar[0]].barAllign === 'vertical'){
         barArray[selectedBar[0]].barPosition = mousePosition.x        
@@ -57,9 +49,9 @@ class App extends Component {
       arr.map((bar,i) => {
 
         if(!Number.isInteger(bar.endParent)){
-          this.constructBar(i+2, barArray[bar.startParent], this.edgeSorter(bar.endParent))
+          this.constructBar(i+2, barArray[bar.startParent], edgeSorter(bar.endParent))
         }else if(!Number.isInteger(bar.startParent)){
-          this.constructBar(i+2, this.edgeSorter(bar.startParent), barArray[bar.endParent]) 
+          this.constructBar(i+2, edgeSorter(bar.startParent), barArray[bar.endParent]) 
         } else {
           this.constructBar(i+2, barArray[bar.startParent], barArray[bar.endParent])
         }
@@ -68,11 +60,7 @@ class App extends Component {
     }
   }
 
-
-
   mouseTracker = (e) =>{
-    let {barArray, boxArray} = this.state
-
     let x = e.clientX
     let y = e.clientY
     this.setState({
@@ -103,14 +91,8 @@ class App extends Component {
   }
 
   newBar = () =>{
-    const {barArray } = this.state
+    const {barArray} = this.state
     this.constructBar(barArray.length, barArray[1], edge.top)
-  }
-
-  convertToPercent = (x,y) => {
-    let xPercent = x/window.innerWidth * 100
-    let yPercent = y/window.innerHeight * 100
-    return {x:xPercent, y:yPercent}
   }
 
   updateBoxes = () =>{
@@ -120,14 +102,13 @@ class App extends Component {
       arr.map((box,i) => {
         let parents = box.parents.map(parent =>{
           if(!Number.isInteger(parent)){
-            return this.edgeSorter(parent)
+            return edgeSorter(parent)
           } else {
             return barArray[parent]
           }
-          
         })
-        this.boxBuilder(parents, box.boxId, box.boxColor)
-
+        return this.boxBuilder(parents, box.boxId, box.boxColor)
+        
       })
     }
 
@@ -162,10 +143,7 @@ class App extends Component {
       boxColor:color
     }
     boxArray.splice(box.boxId, 1, box)
-
-
     return box.boxId
-
   }
 
   newBox = (parents) => {
@@ -174,24 +152,20 @@ class App extends Component {
     boxArray[i].boxColor = colorSwap.start(i)
   }
 
- 
-
   componentDidMount(){
-    const {barArray, boxArray} = this.state;
+    const {barArray} = this.state;
     let arr = starterBoxes(barArray)
     arr.map((box, i) => {
-      this.newBox(box)
+      return this.newBox(box)
+
     })
-
-
 
   }
 
   onBoxClick = (color, id)=>{
-    // const {boxArray} = this.state;
-    // colorSwap.rotate(boxArray, id, color)
-    // this.setState(boxArray); 
-    this.updateBoxes();
+    const {boxArray} = this.state;
+    colorSwap.rotate(boxArray, id, color)
+    this.setState(boxArray); 
 
   }
 
