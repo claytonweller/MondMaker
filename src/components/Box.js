@@ -1,7 +1,9 @@
 import React from 'react';
 import './Box.css'
 
-const Box = ({onBoxClick, boxTop, boxRight, boxBottom, boxLeft, boxColor, boxId})=>{
+const Box = ({ onBoxClick, boxTop, boxRight, boxBottom, boxLeft, boxColor, boxId})=>{
+
+	let zIndex = boxId-100
 
 	let boxProps = {
 		position:'absolute', 
@@ -11,7 +13,7 @@ const Box = ({onBoxClick, boxTop, boxRight, boxBottom, boxLeft, boxColor, boxId}
 		left:`${boxLeft}%`, 
 		backgroundColor:boxColor, 
 		display:'block',
-		zIndex:-1,
+		zIndex: zIndex,
 	}
 
 	return(

@@ -87,28 +87,29 @@ class App extends Component {
     selectedBar[0] = index
   }
 
-  newBarClick = () =>{
-    const {barArray, boxArray} = this.state
-    let edge1 = document.getElementById('edge1').value
-    let edge2 = document.getElementById('edge2').value
-      
-    const interpret = (value) =>{
-      let int = parseInt(value)
-      if(!Number.isInteger(int)){
-        console.log(value)
-        return edgeSorter(value)
-      } else { 
-        return barArray[value]
-      }
-    }  
-    
-
-    this.newBar(interpret(edge1), interpret(edge2))
+  interpretParentId = (value) =>{
+    const {barArray} = this.state
+    let int = parseInt(value, 10)
+    if(!Number.isInteger(int)){
+      return edgeSorter(value)
+    } else { 
+      return barArray[value]
+    }
   }
 
-  newBar = (edge1, edge2) =>{
+  getFieldValue = (id) => document.getElementById(id).value
+
+  newBarClick = () =>{
+    this.newBar(
+      this.interpretParentId(this.getFieldValue('edge1')),
+      this.interpretParentId(this.getFieldValue('edge2')),
+      this.getFieldValue('new-bar-position')
+    )
+  }
+
+  newBar = (edge1, edge2, position) =>{
     const {barArray} = this.state
-    let bar = this.constructBar(barArray.length, edge1, edge2, 40)
+    let bar = this.constructBar(barArray.length, edge1, edge2, position)
     let box = this.boxSelector(bar)
     this.boxSplitter(bar, box)
     
