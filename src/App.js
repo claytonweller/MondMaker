@@ -1,14 +1,17 @@
 import React, { Component } from 'react';
 import Allbars from './components/Allbars';
 import AllBoxes from './components/AllBoxes';
+import AllNodes from './components/AllNodes';
 import BarAdder from './components/BarAdder';
 import './App.css';
 
 import colorSwap from './functions/colorSwap'
 import starterBoxes from './components/starterBoxes'
 import edgeSorter from './functions/edgeSorter'
+import interpretParentId from './functions/interpretParentId'
 import convertToPercent from './functions/convertToPercent'
 import barMaker from './functions/barMaker'
+import boxBuilder from './functions/boxBuilder'
 import evalDist from './functions/evalDist'
 
 
@@ -18,10 +21,14 @@ class App extends Component {
     super();
     this.state={
       barArray:[
-        {index:0, barAllign:'vertical', barPosition:30, startPosition:0, endPosition:100},
-        {index:1, barAllign:'horizontal', barPosition:80, startPosition:0, endPosition:100},     
+        {index:0, barAllign:'vertical', barPosition:70, startPosition:0, endPosition:100, startParent:'top', endParent:'bottom'},
+        {index:1, barAllign:'horizontal', barPosition:80, startPosition:0, endPosition:100, startParent:'left', endParent:'right'},     
       ],
       boxArray:[],
+      nodeArray:[
+        {baseParent:0, boundParents:[1, 'bottom']},
+        {baseParent:0, boundParents:['top', 1]},
+      ],
       mouseY: 0,
       mouseX: 0,
       hold:false,
@@ -36,7 +43,6 @@ class App extends Component {
       mouseY:y,
       mouseX:x,
     })
-
     this.updateBars()   
     this.moveBar()
     this.updateBoxes()
@@ -70,12 +76,9 @@ class App extends Component {
         } else {
           return this.constructBar(i+2, barArray[bar.startParent], barArray[bar.endParent], bar.barPosition)
         }
-        
       })
     }
   }
-
-
 
   grabBar = () => this.setState({hold:true})
   releaseBar = () => this.setState({hold:false, selectedBar:[]})
@@ -87,24 +90,16 @@ class App extends Component {
     selectedBar[0] = index
   }
 
-  interpretParentId = (value) =>{
-    const {barArray} = this.state
-    let int = parseInt(value, 10)
-    if(!Number.isInteger(int)){
-      return edgeSorter(value)
-    } else { 
-      return barArray[value]
-    }
-  }
-
   getFieldValue = (id) => document.getElementById(id).value
 
   newBarClick = () =>{
+    const {barArray} = this.state
     this.newBar(
-      this.interpretParentId(this.getFieldValue('edge1')),
-      this.interpretParentId(this.getFieldValue('edge2')),
+      interpretParentId(barArray, this.getFieldValue('edge1')),
+      interpretParentId(barArray, this.getFieldValue('edge2')),
       this.getFieldValue('new-bar-position')
     )
+    console.log(this.state.barArray)
   }
 
   newBar = (edge1, edge2, position) =>{
@@ -112,7 +107,6 @@ class App extends Component {
     let bar = this.constructBar(barArray.length, edge1, edge2, position)
     let box = this.boxSelector(bar)
     this.boxSplitter(bar, box)
-    
   }
 
   boxSelector = (bar)=>{
@@ -130,11 +124,10 @@ class App extends Component {
     }  
     let startBox = startBoxArray[0]
     return startBox
-
   }
 
   boxSplitter = (bar, startBox) => {
-    const {barArray} = this.state
+    const {barArray, boxArray} = this.state
                
     let definiteParents = [bar.startParent, bar.endParent]
     let partialParents = startBox.parents.filter(parent => parent !== bar.startParent).filter(parent => parent !==bar.endParent)
@@ -154,10 +147,8 @@ class App extends Component {
         return edgeSorter(index)
       }
     })
-
-    this.boxBuilder(parentsA, startBox.boxId, startBox.boxColor)
+    boxBuilder(boxArray, parentsA, startBox.boxId, startBox.boxColor)
     this.newBox(parentsB)
-
   }
   
   constructBar = (i, bar1, bar2, barPosition) =>{
@@ -165,7 +156,6 @@ class App extends Component {
     let newBar = barMaker(i, bar1, bar2, barPosition);
     barArray[i] = newBar
     return newBar
-    
   }
 
   updateBoxes = () =>{
@@ -180,48 +170,14 @@ class App extends Component {
             return barArray[parent]
           }
         })
-        return this.boxBuilder(parents, box.boxId, box.boxColor)
-        
+        return boxBuilder(boxArray, parents, box.boxId, box.boxColor)   
       })
     }
-
-  }
-
-  boxBuilder = (parents, index, color) =>{
-    const {boxArray} = this.state
-    
-    let horizontal = parents.filter(bar => bar.barAllign === 'horizontal')
-    let top = horizontal[1]
-    let bottom = horizontal[0]
-    if (horizontal[1].barPosition>horizontal[0].barPosition){
-      top = horizontal[0]
-      bottom = horizontal[1]
-    } 
-
-    let vertical = parents.filter(bar => bar.barAllign === 'vertical')
-    let left = vertical[0]
-    let right = vertical[1]
-    if (vertical[0].barPosition>vertical[1].barPosition){
-      left = vertical[1]
-      right = vertical[0]
-    }
-
-    let box = {
-      boxId:index,
-      boxLeft:left.barPosition,
-      boxTop:top.barPosition,
-      boxRight:right.barPosition,
-      boxBottom:bottom.barPosition,
-      parents:[ top.index, bottom.index, left.index, right.index],
-      boxColor:color
-    }
-    boxArray.splice(box.boxId, 1, box)
-    return box.boxId
   }
 
   newBox = (parents, startColor) => {
     const {boxArray}= this.state;
-    let i = this.boxBuilder(parents, boxArray.length)
+    let i = boxBuilder(boxArray, parents, boxArray.length)
     boxArray[i].boxColor = colorSwap.start(i)
   }
 
@@ -232,18 +188,16 @@ class App extends Component {
       return this.newBox(box)
 
     })
-
   }
 
   onBoxClick = (color, id)=>{
     const {boxArray} = this.state;
     colorSwap.rotate(boxArray, id, color)
     this.setState(boxArray); 
-
   }
 
   render() {
-    const { mouseX, mouseY, barArray, boxArray } = this.state;
+    const { mouseX, mouseY, barArray, boxArray, nodeArray } = this.state;
     return (
       
       <div 
@@ -253,17 +207,22 @@ class App extends Component {
         onMouseUp={this.releaseBar} 
         onClick={this.onMouseClick}
       >
-
-        <Allbars 
-          barArray={barArray}
-          barClick={this.barClick} 
-        />
-        <AllBoxes onBoxClick={this.onBoxClick} boxArray={boxArray} /> 
+        
         <BarAdder
           mouseX={mouseX}
           mouseY={mouseY}
           newBar={this.newBarClick}
         />
+        <AllNodes 
+          nodeArray = {nodeArray} 
+          barArray = {barArray}
+        />
+        <Allbars 
+          barArray={barArray}
+          barClick={this.barClick} 
+        />
+        <AllBoxes onBoxClick={this.onBoxClick} boxArray={boxArray} /> 
+        
       </div>
     );
   }
