@@ -26,8 +26,19 @@ class App extends Component {
       ],
       boxArray:[],
       nodeArray:[
+        {baseParent:'left', boundParents:[1, 'bottom']},
+        {baseParent:'left', boundParents:[1, 'top']},
+        {baseParent:'right', boundParents:[1, 'bottom']},
+        {baseParent:'right', boundParents:[1, 'top']},
+        {baseParent:'bottom', boundParents:[0, 'right']},
+        {baseParent:'bottom', boundParents:[0, 'left']},
+        {baseParent:'top', boundParents:[0, 'right']},
+        {baseParent:'top', boundParents:[0, 'left']},
+        {baseParent:1, boundParents:['left', 0]},
+        {baseParent:0, boundParents:[1, 'top']},
+        {baseParent:1, boundParents:['right', 0]},
         {baseParent:0, boundParents:[1, 'bottom']},
-        {baseParent:0, boundParents:['top', 1]},
+
       ],
       mouseY: 0,
       mouseX: 0,
@@ -99,7 +110,6 @@ class App extends Component {
       interpretParentId(barArray, this.getFieldValue('edge2')),
       this.getFieldValue('new-bar-position')
     )
-    console.log(this.state.barArray)
   }
 
   newBar = (edge1, edge2, position) =>{
@@ -107,6 +117,17 @@ class App extends Component {
     let bar = this.constructBar(barArray.length, edge1, edge2, position)
     let box = this.boxSelector(bar)
     this.boxSplitter(bar, box)
+    this.nodeSelector(bar)
+  }
+
+  nodeSelector = (bar)=>{
+    const {nodeArray, barArray} = this.state
+    let node1 = nodeArray.filter(node=> node.baseParent === bar.startParent)
+    let node2 = nodeArray.filter(node=> node.baseParent === bar.endParent)
+    node1 = evalDist.node(node1, bar, barArray)
+
+    console.log(node1)
+
   }
 
   boxSelector = (bar)=>{
@@ -117,9 +138,9 @@ class App extends Component {
     
     if(startBoxArray.length >1){
       if(bar.barAllign === 'horizontal'){
-        startBoxArray = startBoxArray.filter( box => Math.abs(box.boxTop - box.boxBottom) === evalDist(box.boxTop, box.boxBottom, bar.barPosition))       
+        startBoxArray = startBoxArray.filter( box => Math.abs(box.boxTop - box.boxBottom) === evalDist.compare(box.boxTop, box.boxBottom, bar.barPosition))       
       } else if(bar.barAllign === 'vertical') {
-        startBoxArray = startBoxArray.filter( box => Math.abs(box.boxLeft - box.boxRight) === evalDist(box.boxLeft, box.boxRight, bar.barPosition))
+        startBoxArray = startBoxArray.filter( box => Math.abs(box.boxLeft - box.boxRight) === evalDist.compare(box.boxLeft, box.boxRight, bar.barPosition))
       }
     }  
     let startBox = startBoxArray[0]
@@ -186,7 +207,6 @@ class App extends Component {
     let arr = starterBoxes(barArray)
     arr.map((box, i) => {
       return this.newBox(box)
-
     })
   }
 

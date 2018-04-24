@@ -7,7 +7,7 @@ import interpretParentId from '../functions/interpretParentId'
 const AllNodes = ({nodeArray, barArray}) =>{
 	
 	const findLowerBound = (bound1, bound2) =>{
-		console.log(bound1)
+		
 		if(bound1>bound2){
 			return bound2
 		} else {

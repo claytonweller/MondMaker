@@ -1,6 +1,6 @@
 import edgeSorter from './edgeSorter';
 
-const interpetParentId = (barArray, parentId) =>{
+const interpretParentId = (barArray, parentId) =>{
 	let int = parseInt(parentId, 10)
 	if(!Number.isInteger(int)){
      return edgeSorter(parentId)
@@ -9,4 +9,4 @@ const interpetParentId = (barArray, parentId) =>{
    }
 }
 
-export default interpetParentId
+export default interpretParentId
