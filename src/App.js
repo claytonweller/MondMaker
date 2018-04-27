@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
+import html2canvas from 'html2canvas';
+
 import Allbars from './components/Allbars';
 import AllBoxes from './components/AllBoxes';
 import AllNodes from './components/AllNodes';
 import BarAdder from './components/BarAdder';
+
 import './App.css';
 
 import colorSwap from './functions/colorSwap'
@@ -13,6 +16,7 @@ import convertToPercent from './functions/convertToPercent'
 import barMaker from './functions/barMaker'
 import boxBuilder from './functions/boxBuilder'
 import compare from './functions/compare'
+import midpointFinder from './functions/midpointFinder'
 
 
 
@@ -152,7 +156,8 @@ class App extends Component {
     let baseParent = nodeArray[index].baseParent
     let boundParentsIds = nodeArray[index].boundParents
     let boundParentsPositions = boundParentsIds.map(id => interpretParentId(barArray, id).barPosition )
-    let boundParentsMidpoint = Math.abs(boundParentsPositions[0]-boundParentsPositions[1])/2
+    let boundParentsMidpoint = midpointFinder(boundParentsPositions[0], boundParentsPositions[1])
+    
     if(parentBars[0] === undefined & parentBars[1] === undefined){
       parentArr = [baseParent]
       selectNodesArr = [nodeArray[index]]
@@ -247,6 +252,14 @@ class App extends Component {
     this.setState(boxArray); 
   }
 
+  //https://html2canvas.hertzen.com/getting-started - For the canvas thing
+
+  snapshot = () =>{
+    html2canvas(document.body).then(function(canvas) {
+      console.log(canvas)
+    });
+  }
+
 
   componentWillMount(){
     const {barArray} = this.state;
@@ -274,6 +287,7 @@ class App extends Component {
           mouseY={mouseY}
           newBar={this.newBarClick}
         />
+        <button onClick = {this.snapshot} > Snapshot</button>
         <AllNodes 
           onNodeClick = {this.onNodeClick}
           nodeArray = {nodeArray} 
