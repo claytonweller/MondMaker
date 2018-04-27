@@ -12,7 +12,8 @@ import interpretParentId from './functions/interpretParentId'
 import convertToPercent from './functions/convertToPercent'
 import barMaker from './functions/barMaker'
 import boxBuilder from './functions/boxBuilder'
-import evalDist from './functions/evalDist'
+import compare from './functions/compare'
+import nodeCompare from './functions/nodeCompare'
 
 
 
@@ -34,9 +35,9 @@ class App extends Component {
         {baseParent:'bottom', boundParents:[0, 'left']},
         {baseParent:'top', boundParents:[0, 'right']},
         {baseParent:'top', boundParents:[0, 'left']},
-        {baseParent:1, boundParents:['left', 0]},
+        {baseParent:1, boundParents:[ 0, 'left']},
         {baseParent:0, boundParents:[1, 'top']},
-        {baseParent:1, boundParents:['right', 0]},
+        {baseParent:1, boundParents:[0, 'right']},
         {baseParent:0, boundParents:[1, 'bottom']},
 
       ],
@@ -105,7 +106,8 @@ class App extends Component {
 
   newBarClick = () =>{
     const {barArray} = this.state
-    this.newBar(
+    this.newBar(    
+
       interpretParentId(barArray, this.getFieldValue('edge1')),
       interpretParentId(barArray, this.getFieldValue('edge2')),
       this.getFieldValue('new-bar-position')
@@ -117,17 +119,39 @@ class App extends Component {
     let bar = this.constructBar(barArray.length, edge1, edge2, position)
     let box = this.boxSelector(bar)
     this.boxSplitter(bar, box)
-    this.nodeSelector(bar)
+    this.nodeSplitter(bar)
   }
 
   nodeSelector = (bar)=>{
     const {nodeArray, barArray} = this.state
     let node1 = nodeArray.filter(node=> node.baseParent === bar.startParent)
     let node2 = nodeArray.filter(node=> node.baseParent === bar.endParent)
-    node1 = evalDist.node(node1, bar, barArray)
+    console.log('node1', node1)
+    console.log('node2', node2)
+    node1 = nodeCompare(node1, bar, barArray)
+    node2 = nodeCompare(node2, bar, barArray)
+    let bothNodes = node1.concat(node2)
+    return bothNodes
+  }
 
-    console.log(node1)
-
+  nodeSplitter = (bar)=>{
+    const {nodeArray, barArray} = this.state
+    let oldNodes = this.nodeSelector(bar)
+    console.log(oldNodes[1])
+    let unchangedNodes = nodeArray
+                .filter(node => node.boundParents !== oldNodes[0].boundParents)
+                .filter(node => node.boundParents !== oldNodes[1].boundParents)
+    let newNodes = oldNodes.map(node =>{
+      return [
+          {baseParent:node.baseParent, boundParents:[node.boundParents[0], bar.index]},
+          {baseParent:node.baseParent, boundParents:[node.boundParents[1], bar.index]}
+        ]   
+    })
+    newNodes = newNodes[0].concat(newNodes[1])
+    let finalNode = {baseParent:bar.index, boundParents:[bar.startParent, bar.endParent]}
+    let mostNodes = newNodes.concat(unchangedNodes)
+    let allNodes = mostNodes.concat(finalNode)
+    this.setState({nodeArray:allNodes})
   }
 
   boxSelector = (bar)=>{
@@ -138,9 +162,9 @@ class App extends Component {
     
     if(startBoxArray.length >1){
       if(bar.barAllign === 'horizontal'){
-        startBoxArray = startBoxArray.filter( box => Math.abs(box.boxTop - box.boxBottom) === evalDist.compare(box.boxTop, box.boxBottom, bar.barPosition))       
+        startBoxArray = startBoxArray.filter( box => Math.abs(box.boxTop - box.boxBottom) === compare(box.boxTop, box.boxBottom, bar.barPosition))       
       } else if(bar.barAllign === 'vertical') {
-        startBoxArray = startBoxArray.filter( box => Math.abs(box.boxLeft - box.boxRight) === evalDist.compare(box.boxLeft, box.boxRight, bar.barPosition))
+        startBoxArray = startBoxArray.filter( box => Math.abs(box.boxLeft - box.boxRight) === compare(box.boxLeft, box.boxRight, bar.barPosition))
       }
     }  
     let startBox = startBoxArray[0]

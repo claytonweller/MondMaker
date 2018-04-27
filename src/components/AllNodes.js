@@ -16,8 +16,6 @@ const AllNodes = ({nodeArray, barArray}) =>{
 	}
 	
 	let nodePosition = (node) =>{
-		
-		
 		let baseParent = interpretParentId(barArray, node.baseParent)
 		let boundParent1 = interpretParentId( barArray, node.boundParents[0])
 		let boundParent2 = interpretParentId( barArray, node.boundParents[1])
