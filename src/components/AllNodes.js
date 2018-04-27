@@ -4,7 +4,7 @@ import interpretParentId from '../functions/interpretParentId'
 
 // {baseParent:0, boundParents:[1, 'bottom'], position:90}
 
-const AllNodes = ({nodeArray, barArray}) =>{
+const AllNodes = ({nodeArray, barArray, canSeeNodes, onNodeClick}) =>{
 	
 	const findLowerBound = (bound1, bound2) =>{
 		
@@ -39,8 +39,11 @@ const AllNodes = ({nodeArray, barArray}) =>{
 			{nodeArray.map((node,i) => {
 				return(
 					<Node
+						canSee = {canSeeNodes}
+						nodeIndex = {i}
 						xPosition = {nodePosition(node).x}
 						yPosition = {nodePosition(node).y}
+						onNodeClick = {onNodeClick}
 						key={i}
 					/>
 				)

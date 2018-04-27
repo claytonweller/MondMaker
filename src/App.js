@@ -13,7 +13,6 @@ import convertToPercent from './functions/convertToPercent'
 import barMaker from './functions/barMaker'
 import boxBuilder from './functions/boxBuilder'
 import compare from './functions/compare'
-import nodeCompare from './functions/nodeCompare'
 
 
 
@@ -45,6 +44,9 @@ class App extends Component {
       mouseX: 0,
       hold:false,
       selectedBar:[],
+      canSeeNodes:false,
+      parentBars:[],
+      selectedNodes:[],
     }
   }
 
@@ -105,13 +107,13 @@ class App extends Component {
   getFieldValue = (id) => document.getElementById(id).value
 
   newBarClick = () =>{
-    const {barArray} = this.state
-    this.newBar(    
-
-      interpretParentId(barArray, this.getFieldValue('edge1')),
-      interpretParentId(barArray, this.getFieldValue('edge2')),
-      this.getFieldValue('new-bar-position')
-    )
+    this.setState({canSeeNodes:true})
+  }
+  constructBar = (i, bar1, bar2, barPosition) =>{
+    const { barArray } = this.state;
+    let newBar = barMaker(i, bar1, bar2, barPosition);
+    barArray[i] = newBar
+    return newBar
   }
 
   newBar = (edge1, edge2, position) =>{
@@ -122,26 +124,13 @@ class App extends Component {
     this.nodeSplitter(bar)
   }
 
-  nodeSelector = (bar)=>{
-    const {nodeArray, barArray} = this.state
-    let node1 = nodeArray.filter(node=> node.baseParent === bar.startParent)
-    let node2 = nodeArray.filter(node=> node.baseParent === bar.endParent)
-    console.log('node1', node1)
-    console.log('node2', node2)
-    node1 = nodeCompare(node1, bar, barArray)
-    node2 = nodeCompare(node2, bar, barArray)
-    let bothNodes = node1.concat(node2)
-    return bothNodes
-  }
 
   nodeSplitter = (bar)=>{
-    const {nodeArray, barArray} = this.state
-    let oldNodes = this.nodeSelector(bar)
-    console.log(oldNodes[1])
+    const {nodeArray, selectedNodes} = this.state
     let unchangedNodes = nodeArray
-                .filter(node => node.boundParents !== oldNodes[0].boundParents)
-                .filter(node => node.boundParents !== oldNodes[1].boundParents)
-    let newNodes = oldNodes.map(node =>{
+                .filter(node => node.boundParents !== selectedNodes[0].boundParents)
+                .filter(node => node.boundParents !== selectedNodes[1].boundParents)
+    let newNodes = selectedNodes.map(node =>{
       return [
           {baseParent:node.baseParent, boundParents:[node.boundParents[0], bar.index]},
           {baseParent:node.baseParent, boundParents:[node.boundParents[1], bar.index]}
@@ -152,6 +141,38 @@ class App extends Component {
     let mostNodes = newNodes.concat(unchangedNodes)
     let allNodes = mostNodes.concat(finalNode)
     this.setState({nodeArray:allNodes})
+  }
+
+  onNodeClick = (event) =>{
+    const{parentBars, nodeArray, barArray, selectedNodes} = this.state
+    let parentArr =[]
+    let selectNodesArr = []
+    let node = event.target.id    
+    let index = node.split('node')[1]
+    let baseParent = nodeArray[index].baseParent
+    let boundParentsIds = nodeArray[index].boundParents
+    let boundParentsPositions = boundParentsIds.map(id => interpretParentId(barArray, id).barPosition )
+    let boundParentsMidpoint = Math.abs(boundParentsPositions[0]-boundParentsPositions[1])/2
+    if(parentBars[0] === undefined & parentBars[1] === undefined){
+      parentArr = [baseParent]
+      selectNodesArr = [nodeArray[index]]
+      this.setState({
+        parentBars:parentArr,
+        selectedNodes: selectNodesArr
+      })
+    } else if(parentBars[1] === undefined){
+      parentArr = [parentBars[0], baseParent]
+      selectedNodes.push(nodeArray[index])
+      this.newBar(
+        interpretParentId(barArray, parentArr[1]),
+        interpretParentId(barArray, parentArr[0]),
+        boundParentsMidpoint
+      )
+      this.setState({
+        parentBars:[],
+        canSeeNodes:false
+      })
+    }
   }
 
   boxSelector = (bar)=>{
@@ -196,12 +217,6 @@ class App extends Component {
     this.newBox(parentsB)
   }
   
-  constructBar = (i, bar1, bar2, barPosition) =>{
-    const { barArray } = this.state;
-    let newBar = barMaker(i, bar1, bar2, barPosition);
-    barArray[i] = newBar
-    return newBar
-  }
 
   updateBoxes = () =>{
     const {barArray, boxArray} = this.state
@@ -226,6 +241,13 @@ class App extends Component {
     boxArray[i].boxColor = colorSwap.start(i)
   }
 
+  onBoxClick = (color, id)=>{
+    const {boxArray} = this.state;
+    colorSwap.rotate(boxArray, id, color)
+    this.setState(boxArray); 
+  }
+
+
   componentWillMount(){
     const {barArray} = this.state;
     let arr = starterBoxes(barArray)
@@ -234,14 +256,9 @@ class App extends Component {
     })
   }
 
-  onBoxClick = (color, id)=>{
-    const {boxArray} = this.state;
-    colorSwap.rotate(boxArray, id, color)
-    this.setState(boxArray); 
-  }
 
   render() {
-    const { mouseX, mouseY, barArray, boxArray, nodeArray } = this.state;
+    const { mouseX, mouseY, barArray, boxArray, nodeArray, canSeeNodes } = this.state;
     return (
       
       <div 
@@ -258,8 +275,10 @@ class App extends Component {
           newBar={this.newBarClick}
         />
         <AllNodes 
+          onNodeClick = {this.onNodeClick}
           nodeArray = {nodeArray} 
           barArray = {barArray}
+          canSeeNodes ={canSeeNodes}
         />
         <Allbars 
           barArray={barArray}
