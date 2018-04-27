@@ -1,0 +1,8 @@
+.node{
+	position:absolute;
+	width: 40px;
+	height:40px;
+   transform: translate(-17px, -17px);
+   transition-duration: 50ms;
+}
+
