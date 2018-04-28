@@ -255,8 +255,14 @@ class App extends Component {
   //https://html2canvas.hertzen.com/getting-started - For the canvas thing
 
   snapshot = () =>{
-    html2canvas(document.body).then(function(canvas) {
-      console.log(canvas)
+    html2canvas(document.body).then(canvas => {
+      let dataURL = canvas.toDataURL()
+      let link = document.createElement('a')
+      link.download = 'test'
+      link.href = dataURL
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
     });
   }
 
