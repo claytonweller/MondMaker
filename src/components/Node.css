@@ -4,5 +4,6 @@
 	height:40px;
    transform: translate(-17px, -17px);
    transition-duration: 50ms;
+   overflow: hidden;
 }
 

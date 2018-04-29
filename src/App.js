@@ -1,12 +1,17 @@
+//Modules & CSS
+
 import React, { Component } from 'react';
-import html2canvas from 'html2canvas';
+import './App.css';
+import './fonts/fonts.css'
+
+///Components
 
 import Allbars from './components/Allbars';
 import AllBoxes from './components/AllBoxes';
 import AllNodes from './components/AllNodes';
-import BarAdder from './components/BarAdder';
+import Nav from './components/Nav'
 
-import './App.css';
+//Functions
 
 import colorSwap from './functions/colorSwap'
 import starterBoxes from './components/starterBoxes'
@@ -254,17 +259,7 @@ class App extends Component {
 
   //https://html2canvas.hertzen.com/getting-started - For the canvas thing
 
-  snapshot = () =>{
-    html2canvas(document.body).then(canvas => {
-      let dataURL = canvas.toDataURL()
-      let link = document.createElement('a')
-      link.download = 'test'
-      link.href = dataURL
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    });
-  }
+
 
 
   componentWillMount(){
@@ -287,13 +282,13 @@ class App extends Component {
         onMouseUp={this.releaseBar} 
         onClick={this.onMouseClick}
       >
-        
-        <BarAdder
+        <Nav
           mouseX={mouseX}
           mouseY={mouseY}
           newBar={this.newBarClick}
+
         />
-        <button onClick = {this.snapshot} > Snapshot</button>
+
         <AllNodes 
           onNodeClick = {this.onNodeClick}
           nodeArray = {nodeArray} 
