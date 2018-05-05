@@ -22,3 +22,13 @@
 	transform: scale(1.08) translate(-20px, -21px);
 	cursor: pointer;
 }
+
+.selected{
+	transform: scale(1.30) translate(-15px, -15px);
+	border-color: orange;
+	color: orange;
+}
+
+.selected:hover{
+	transform: scale(1.30) translate(-15px, -15px);
+}

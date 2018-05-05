@@ -6,7 +6,7 @@ const edgeSorter = (dir) =>{
    case 'left': return edge.left 
    case 'top': return edge.top
    case 'bottom': return edge.bottom
-   default: return edge.top
+   default: return dir
  }
 }
 

@@ -23,6 +23,7 @@ import boxBuilder from './functions/boxBuilder'
 import compare from './functions/compare'
 import midpointFinder from './functions/midpointFinder'
 import appHeight from './functions/appHeight'
+import findNearestBar from './functions/findNearestBar'
 
 class App extends Component {
   constructor(){
@@ -56,6 +57,7 @@ class App extends Component {
       parentBars:[],
       selectedNodes:[],
       appHeight:0,
+      addingBar:false,
     }
   }
 
@@ -116,8 +118,15 @@ class App extends Component {
   getFieldValue = (id) => document.getElementById(id).value
 
   newBarClick = () =>{
-    this.setState({canSeeNodes:true})
+    const { addingBar, nodeArray} = this.state
+    if(addingBar === false){
+      this.setState({canSeeNodes:true,addingBar:true})  
+    } else {
+      nodeArray.forEach(node => node.visible=false)
+      this.setState({canSeeNodes:false, addingBar:false, selectedNodes:[], parentBars:[]})
+    }    
   }
+
   constructBar = (i, bar1, bar2, barPosition) =>{
     const { barArray } = this.state;
     let newBar = barMaker(i, bar1, bar2, barPosition);
@@ -166,18 +175,22 @@ class App extends Component {
     if(parentBars[0] === undefined & parentBars[1] === undefined){
       parentArr = [baseParent]
       selectNodesArr = [nodeArray[index]]
-      let viableParents = nodeArray
-          .filter(node => node.baseParent !== nodeArray[index].baseParent)
-          .filter(node => nodeArray[index].boundParents.includes(node.boundParents[0]))
-          .filter(node => nodeArray[index].boundParents.includes(node.boundParents[1]))
+      selectNodesArr[0].visible = 'selected'
       
+      let viableParents = nodeArray
+          .filter(node => node.baseParentOrientation === nodeArray[index].baseParentOrientation)
+          .filter(node => node.baseParent !== nodeArray[index].baseParent)
+          // .filter(node => nodeArray[index].boundParents.includes(node.boundParents[0]))
+          // .filter(node => nodeArray[index].boundParents.includes(node.boundParents[1]))
+      
+      // findNearestBar(barArray[baseParent], barArray)
       viableParents.forEach(node => node.visible=true)
-      console.log(viableParents)
       this.setState({
         parentBars:parentArr,
-        selectedNodes: selectNodesArr
+        selectedNodes: selectNodesArr,
+        canSeeNodes:false
       })
-    } else if(parentBars[1] === undefined){
+    } else if(parentBars[1] === undefined && selectedNodes[0] !== nodeArray[index]){
       parentArr = [parentBars[0], baseParent]
       selectedNodes.push(nodeArray[index])
       this.newBar(
@@ -185,9 +198,18 @@ class App extends Component {
         interpretParentId(barArray, parentArr[0]),
         boundParentsMidpoint
       )
+      nodeArray.forEach(node => node.visible=false)
       this.setState({
         parentBars:[],
-        canSeeNodes:false
+        addingBar:false
+      })
+    } else {
+      nodeArray[index].visible = false
+      nodeArray.forEach(node => node.visible=false)
+      this.setState({
+        selectedNodes:[],
+        parentBars:[],
+        canSeeNodes:true
       })
     }
   }
@@ -285,7 +307,7 @@ class App extends Component {
 
 
   render() {
-    const { mouseX, mouseY, appHeight, barArray, boxArray, nodeArray, canSeeNodes } = this.state;
+    const { mouseX, mouseY, addingBar, appHeight, barArray, boxArray, nodeArray, canSeeNodes } = this.state;
     return (
       
       <div 
@@ -298,6 +320,7 @@ class App extends Component {
           newBar={this.newBarClick}
           mouseX={mouseX}
           mouseY={mouseY}
+          addingBar={addingBar}
         />
         <div style={{height:appHeight, width:'100%', position:'absolute', overflow:'hidden'}}>
           <AllNodes 

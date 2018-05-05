@@ -3,7 +3,7 @@ import html2canvas from 'html2canvas';
 import './Nav.css'
 
 
-const Nav = ({newBar, mouseX, mouseY}) =>{
+const Nav = ({addingBar, newBar, mouseX, mouseY}) =>{
 
   const snapshot = () =>{
     html2canvas(document.body).then(canvas => {
@@ -17,12 +17,18 @@ const Nav = ({newBar, mouseX, mouseY}) =>{
     });
   }
 
-
+  const newBarButtonState = () =>{
+    if(addingBar === true){
+      return '-'
+    } else  {
+      return '+'
+    }
+  }
 
 	return(
 
 		<div className="nav-bar" id="nav">
-        <div className="title add" id='new-bar' onClick={newBar}>+</div>
+        <div className="title add" id='new-bar' onClick={newBar}>{newBarButtonState()}</div>
         <span className="title"> mondrian </span>
         <div onClick = {snapshot} > Snapshot</div>
       </div>

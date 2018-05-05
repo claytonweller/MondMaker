@@ -39,6 +39,7 @@ const AllNodes = ({nodeArray, barArray, canSeeNodes, onNodeClick}) =>{
 			{nodeArray.map((node,i) => {
 				return(
 					<Node
+						visible = {node.visible}
 						canSee = {canSeeNodes}
 						nodeIndex = {i}
 						xPosition = {nodePosition(node).x}
