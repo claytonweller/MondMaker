@@ -1,10 +1,9 @@
 import React from 'react';
-import BarAdder from './BarAdder';
 import html2canvas from 'html2canvas';
 import './Nav.css'
 
 
-const Nav = ({mouseX, mouseY, newBar}) =>{
+const Nav = ({newBar, mouseX, mouseY}) =>{
 
   const snapshot = () =>{
     html2canvas(document.body).then(canvas => {
@@ -18,16 +17,14 @@ const Nav = ({mouseX, mouseY, newBar}) =>{
     });
   }
 
+
+
 	return(
 
-		<div className="nav-bar">
-        <BarAdder
-          mouseX={mouseX}
-          mouseY={mouseY}
-          newBar={newBar}
-        />
-        <button onClick = {snapshot} > Snapshot</button>
-        <span> Mondrian </span>
+		<div className="nav-bar" id="nav">
+        <div className="title add" id='new-bar' onClick={newBar}>+</div>
+        <span className="title"> mondrian </span>
+        <div onClick = {snapshot} > Snapshot</div>
       </div>
 	)
 }

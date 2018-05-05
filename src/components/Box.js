@@ -3,7 +3,7 @@ import './Box.css'
 
 const Box = ({ onBoxClick, boxTop, boxRight, boxBottom, boxLeft, boxColor, boxId})=>{
 
-	let zIndex = boxId-100
+	let zIndex = boxId
 
 	let boxProps = {
 		position:'absolute', 

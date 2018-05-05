@@ -22,8 +22,7 @@ import barMaker from './functions/barMaker'
 import boxBuilder from './functions/boxBuilder'
 import compare from './functions/compare'
 import midpointFinder from './functions/midpointFinder'
-
-
+import appHeight from './functions/appHeight'
 
 class App extends Component {
   constructor(){
@@ -35,18 +34,18 @@ class App extends Component {
       ],
       boxArray:[],
       nodeArray:[
-        {baseParent:'left', boundParents:[1, 'bottom']},
-        {baseParent:'left', boundParents:[1, 'top']},
-        {baseParent:'right', boundParents:[1, 'bottom']},
-        {baseParent:'right', boundParents:[1, 'top']},
-        {baseParent:'bottom', boundParents:[0, 'right']},
-        {baseParent:'bottom', boundParents:[0, 'left']},
-        {baseParent:'top', boundParents:[0, 'right']},
-        {baseParent:'top', boundParents:[0, 'left']},
-        {baseParent:1, boundParents:[ 0, 'left']},
-        {baseParent:0, boundParents:[1, 'top']},
-        {baseParent:1, boundParents:[0, 'right']},
-        {baseParent:0, boundParents:[1, 'bottom']},
+        {baseParent:'left', boundParents:[1, 'bottom'], baseParentOrientation:'vertical', visible:false},
+        {baseParent:'left', boundParents:[1, 'top'], baseParentOrientation:'vertical', visible:false},
+        {baseParent:'right', boundParents:[1, 'bottom'], baseParentOrientation:'vertical', visible:false},
+        {baseParent:'right', boundParents:[1, 'top'], baseParentOrientation:'vertical', visible:false},
+        {baseParent:'bottom', boundParents:[0, 'right'], baseParentOrientation:'horizontal', visible:false},
+        {baseParent:'bottom', boundParents:[0, 'left'], baseParentOrientation:'horizontal', visible:false},
+        {baseParent:'top', boundParents:[0, 'right'], baseParentOrientation:'horizontal', visible:false},
+        {baseParent:'top', boundParents:[0, 'left'], baseParentOrientation:'horizontal', visible:false},
+        {baseParent:1, boundParents:[ 0, 'left'], baseParentOrientation:'horizontal', visible:false},
+        {baseParent:0, boundParents:[1, 'top'], baseParentOrientation:'vertical', visible:false},
+        {baseParent:1, boundParents:[0, 'right'], baseParentOrientation:'horizontal', visible:false},
+        {baseParent:0, boundParents:[1, 'bottom'], baseParentOrientation:'vertical', visible:false},
 
       ],
       mouseY: 0,
@@ -56,6 +55,7 @@ class App extends Component {
       canSeeNodes:false,
       parentBars:[],
       selectedNodes:[],
+      appHeight:0,
     }
   }
 
@@ -141,12 +141,12 @@ class App extends Component {
                 .filter(node => node.boundParents !== selectedNodes[1].boundParents)
     let newNodes = selectedNodes.map(node =>{
       return [
-          {baseParent:node.baseParent, boundParents:[node.boundParents[0], bar.index]},
-          {baseParent:node.baseParent, boundParents:[node.boundParents[1], bar.index]}
+          {baseParent:node.baseParent, boundParents:[node.boundParents[0], bar.index], baseParentOrientation:node.baseParentOrientation, visible:false},
+          {baseParent:node.baseParent, boundParents:[node.boundParents[1], bar.index], baseParentOrientation:node.baseParentOrientation, visible:false}
         ]   
     })
     newNodes = newNodes[0].concat(newNodes[1])
-    let finalNode = {baseParent:bar.index, boundParents:[bar.startParent, bar.endParent]}
+    let finalNode = {baseParent:bar.index, boundParents:[bar.startParent, bar.endParent], baseParentOrientation:bar.barAllign, visible:false}
     let mostNodes = newNodes.concat(unchangedNodes)
     let allNodes = mostNodes.concat(finalNode)
     this.setState({nodeArray:allNodes})
@@ -162,10 +162,17 @@ class App extends Component {
     let boundParentsIds = nodeArray[index].boundParents
     let boundParentsPositions = boundParentsIds.map(id => interpretParentId(barArray, id).barPosition )
     let boundParentsMidpoint = midpointFinder(boundParentsPositions[0], boundParentsPositions[1])
-    
+
     if(parentBars[0] === undefined & parentBars[1] === undefined){
       parentArr = [baseParent]
       selectNodesArr = [nodeArray[index]]
+      let viableParents = nodeArray
+          .filter(node => node.baseParent !== nodeArray[index].baseParent)
+          .filter(node => nodeArray[index].boundParents.includes(node.boundParents[0]))
+          .filter(node => nodeArray[index].boundParents.includes(node.boundParents[1]))
+      
+      viableParents.forEach(node => node.visible=true)
+      console.log(viableParents)
       this.setState({
         parentBars:parentArr,
         selectedNodes: selectNodesArr
@@ -257,10 +264,10 @@ class App extends Component {
     this.setState(boxArray); 
   }
 
-  //https://html2canvas.hertzen.com/getting-started - For the canvas thing
-
-
-
+  getAppHeight = ()=>{
+    let height = appHeight()
+    return height
+  }
 
   componentWillMount(){
     const {barArray} = this.state;
@@ -268,11 +275,17 @@ class App extends Component {
     arr.map((box, i) => {
       return this.newBox(box)
     })
+
+  }
+
+  componentDidMount(){
+    let height = appHeight();
+    this.setState({appHeight:height})
   }
 
 
   render() {
-    const { mouseX, mouseY, barArray, boxArray, nodeArray, canSeeNodes } = this.state;
+    const { mouseX, mouseY, appHeight, barArray, boxArray, nodeArray, canSeeNodes } = this.state;
     return (
       
       <div 
@@ -280,27 +293,26 @@ class App extends Component {
         onMouseMove={this.mouseTracker} 
         onMouseDown={this.grabBar} 
         onMouseUp={this.releaseBar} 
-        onClick={this.onMouseClick}
       >
         <Nav
+          newBar={this.newBarClick}
           mouseX={mouseX}
           mouseY={mouseY}
-          newBar={this.newBarClick}
-
         />
-
-        <AllNodes 
-          onNodeClick = {this.onNodeClick}
-          nodeArray = {nodeArray} 
-          barArray = {barArray}
-          canSeeNodes ={canSeeNodes}
-        />
-        <Allbars 
-          barArray={barArray}
-          barClick={this.barClick} 
-        />
-        <AllBoxes onBoxClick={this.onBoxClick} boxArray={boxArray} /> 
-        
+        <div style={{height:appHeight, width:'100%', position:'absolute', overflow:'hidden'}}>
+          <AllNodes 
+            onNodeClick = {this.onNodeClick}
+            nodeArray = {nodeArray} 
+            barArray = {barArray}
+            canSeeNodes ={canSeeNodes}
+          />
+          <Allbars 
+            barArray={barArray}
+            barClick={this.barClick} 
+          />
+          <AllBoxes onBoxClick={this.onBoxClick} boxArray={boxArray} />     
+        </div>
+      
       </div>
     );
   }
