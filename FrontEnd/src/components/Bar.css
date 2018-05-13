@@ -1,0 +1,30 @@
+.bar{
+	position: absolute;
+	background-color: black;
+	z-index: 50;
+	transition: 50ms, background-color 1s ease-out, border .3s ease-out;
+
+}
+
+.horizontal{
+	height: 25px;
+	transform: translate(0, -10px);
+}
+
+.vertical{
+	width: 25px;
+	transform:  translate(-10px, 0px);
+}
+
+.bar:hover{
+	background-color: rgb(20,20,20) ;
+	z-index: 75;
+	border: 2px solid rgb(200, 50, 0);
+	cursor: pointer;
+}
+
+.bar:active{
+	border: 2px solid rgb(200, 50, 0);
+	background-color: rgb(20,20,20) ;
+}
+
