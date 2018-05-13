@@ -37,3 +37,15 @@
 	color: #95edff;
 	border-color:#95edff;
 }
+
+.export{
+	color:white;
+	align-self: center;
+	transition-duration: 100ms;
+}
+
+.export:hover{
+	cursor:pointer;
+	transform: scale(1.08);
+	color: #95edff;
+}

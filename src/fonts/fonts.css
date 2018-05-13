@@ -6,3 +6,10 @@
     font-style: normal;
 
 }
+
+@font-face {
+	font-family: 'Cedarville Cursive', cursive;
+	font-family: 'Righteous', cursive;
+	font-family: 'Poiret One', cursive;
+	font-family: 'Libre Barcode 39', cursive;
+}

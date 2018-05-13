@@ -1,0 +1,13 @@
+.signature{
+	z-index: 3000;
+	position:fixed;
+	bottom:2%;
+	left: 2%;
+	transition-duration: 300ms;
+	border: solid transparent 2px;
+}
+
+.signature:hover{
+	cursor: pointer;
+	border: solid orange 2px;
+}

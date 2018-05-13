@@ -10,6 +10,8 @@ import Allbars from './components/Allbars';
 import AllBoxes from './components/AllBoxes';
 import AllNodes from './components/AllNodes';
 import Nav from './components/Nav'
+import ExportWindow from './components/ExportWindow'
+import Signature from './components/Signature'
 
 //Functions
 
@@ -58,6 +60,8 @@ class App extends Component {
       selectedNodes:[],
       appHeight:0,
       addingBar:false,
+      isExporting:false,
+      signature:'test'
     }
   }
 
@@ -305,9 +309,21 @@ class App extends Component {
     this.setState({appHeight:height})
   }
 
+  exportClick = ()=>{
+    if(this.state.isExporting){
+      this.setState({isExporting:false})
+    } else {
+      this.setState({isExporting:true})
+    }
+  }
+
+  onSignClick = (func)=>{
+    let signatureElement = func()
+    this.setState({signature: signatureElement})
+  }
 
   render() {
-    const { mouseX, mouseY, addingBar, appHeight, barArray, boxArray, nodeArray, canSeeNodes } = this.state;
+    const { isExporting, mouseX, mouseY, addingBar, appHeight, barArray, boxArray, nodeArray, canSeeNodes } = this.state;
     return (
       
       <div 
@@ -316,12 +332,20 @@ class App extends Component {
         onMouseDown={this.grabBar} 
         onMouseUp={this.releaseBar} 
       >
+        <ExportWindow
+          isExporting={isExporting}
+          onSignClick = {this.onSignClick}
+        />
         <Nav
           newBar={this.newBarClick}
           mouseX={mouseX}
           mouseY={mouseY}
           addingBar={addingBar}
+          exportClick = {this.exportClick}
         />
+        <Signature
+          signature = {this.state.signature}
+         />
         <div style={{height:appHeight, width:'100%', position:'absolute', overflow:'hidden'}}>
           <AllNodes 
             onNodeClick = {this.onNodeClick}
@@ -334,6 +358,7 @@ class App extends Component {
             barClick={this.barClick} 
           />
           <AllBoxes onBoxClick={this.onBoxClick} boxArray={boxArray} />     
+          
         </div>
       
       </div>
