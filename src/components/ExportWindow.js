@@ -1,21 +1,21 @@
 import React, { Component } from 'react'
+import SignatureInterface from './SignatureInterface'
+import SaveInterface from './SaveInterface'
+import serverLocation from '../functions/serverLocation'
 import './ExportWindow.css'
-
-let signatureStyles = [
-	'title-font',
-	'cursive',
-	'blocky',
-	'print',
-	'ridiculous'
-]
 
 class ExportWindow extends Component {
 	constructor(){
 		super();
 		this.state = {
-			signature:'Your signature',
-			styleIndex: 0
+			mode:'sig',
 		}
+	}
+
+	servertest = () => {
+		fetch(serverLocation)
+			.then(res => res.json())
+			.then(text => console.log(text))
 	}
 
 	isVisible = ()=>{
@@ -26,49 +26,31 @@ class ExportWindow extends Component {
 		}
 	}
 
-	onSigFieldChange = (event) =>{
-		let currentSig = event.target.value
-		if(currentSig !== ''){
-			this.setState({signature:currentSig})	
+	exportStage = ()=>{
+		if(this.state.mode === 'sig'){
+			return <SignatureInterface onSignClick = {this.props.onSignClick} />
+		} else if (this.state.mode === 'save'){
+			return <SaveInterface />
+		}
+	}
+	
+	saveButtonClick = ()=>{
+		if (this.state.mode === 'sig'){
+			this.setState({mode:'save'})
 		} else {
-			this.setState({signature:'Sign Below'})
+			this.setState({mode:'sig'})
 		}
 	}
 
-	styleChange = () =>{
-		let newStyleIndex = this.state.styleIndex + 1
-		if (newStyleIndex< signatureStyles.length){
-			this.setState({styleIndex:newStyleIndex})	
-		} else {
-			this.setState({styleIndex:0})
-		}		
-	}
 
-	signatureElement = () =>{
-		return <div className={signatureStyles[this.state.styleIndex]}> {this.state.signature} </div>
-	}
-
-	exportSignatureElement = ()=>{
-		this.props.onSignClick(this.signatureElement)
-	}
 
 	render(){
       return(
 	      <div className="export-container">
 				<div style={this.isVisible()} className="export-window">
-		        <div className="export-row">
-			        <h1> Sign Your Painting </h1> 
-		        </div>
-		        <div className="export-row">
-			    		{this.signatureElement()}     
-		        </div>
-		        <div className="export-row">
-			        <input type="text" id="sig-field" onChange={this.onSigFieldChange}/>
-		        </div>
-		        <div className="export-row">
-				      <button id="style-button" onClick={this.styleChange}>Change Style </button>
-		        		<button id="sig-button" onClick={this.exportSignatureElement}>Sign</button>
-		        </div>
+					{this.exportStage()}
+			      <button id="test-button" onClick={this.servertest} > TEST </button>
+		     		<button id="save-button" onClick={this.saveButtonClick}> Save </button>
 		      </div>
 			</div>
 

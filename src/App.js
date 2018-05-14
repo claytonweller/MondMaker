@@ -345,6 +345,8 @@ class App extends Component {
         />
         <Signature
           signature = {this.state.signature}
+          mouseX = {mouseX}
+          mouseY = {mouseY}
          />
         <div style={{height:appHeight, width:'100%', position:'absolute', overflow:'hidden'}}>
           <AllNodes 

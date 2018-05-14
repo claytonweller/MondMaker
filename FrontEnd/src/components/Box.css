@@ -1,7 +1,0 @@
-.box{
-	transition: 50ms, background-color .5s;
-}
-
-.box:hover {
-	cursor: pointer;
-}
